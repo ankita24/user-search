@@ -1,23 +1,25 @@
-import React, { useState } from "react";
-import Highlighter from "react-highlight-words";
+import React, { useState, useCallback, useRef } from "react";
 import { headers } from "./constants";
 import debounce from "./debounceFn";
+import { Dropdown } from "./Dropdown";
 import { userDetails } from "./mockData";
+import { Search } from "./Search";
 import "./styles.css";
 
 export default function App() {
   const [data, setData] = useState([]);
   const [input, setInput] = useState("");
+  const listRef = useRef([]);
 
-  const handleChange = (e) => {
-    let input = e.target.value;
-    debounceSearch(input);
-  };
+  const handleChange = useCallback((e) => {
+    setInput(e.target.value);
+    debounceSearch(e.target.value);
+    listRef.current = [];
+  }, []);
 
   const debounceSearch = debounce((input) => {
     if (input === "") {
       setData([]);
-      setInput("");
     } else {
       const keys = headers;
       let finalData = [];
@@ -25,8 +27,6 @@ export default function App() {
       keys.forEach((item) => {
         const data = userDetails.filter((info) => {
           if (Array.isArray(info[item])) {
-            // wtf thike. String includes does partial matching
-            // ye batoa, saare results line by line kyun aa rahe hain?
             return (
               info[item]
                 .map((t) => t.toLowerCase())
@@ -39,35 +39,56 @@ export default function App() {
 
         finalData = [...finalData, ...data];
       });
-      setInput(input);
       setData(finalData);
     }
   }, 1000);
+
+  const handleKeyPress = (e) => {
+    if (e.key === "ArrowDown") {
+      if (listRef.current) {
+        listRef.current[0] && listRef.current[0].focus();
+      }
+    }
+  };
+
+  function handleMouseOver(id) {
+    if (listRef.current) {
+      listRef.current[id].focus();
+    }
+  }
+
+  const handleItemKeyDown = (key, id) => {
+    if (listRef.current) {
+      if (key === "ArrowDown") {
+        if (listRef.current[id + 1]) {
+          listRef.current[id + 1].focus();
+        }
+      } else if (key === "ArrowUp") {
+        if (listRef.current[id - 1]) {
+          listRef.current[id - 1].focus();
+        }
+      }
+    }
+  };
+
+  console.log(listRef.current)
   return (
-    <div className="App">
-      <input id="search" onChange={handleChange} />
-      <div className="scroll">
-        {!!data.length ? (
-          data.map((item, index) => (
-            <div className="card" key={`${item.id}-${index}`}>
-              {headers.map((info) => (
-                <div
-                  key={info}
-                  style={{ display: "flex", flexDirection: "row" }}
-                >
-                  <Highlighter
-                    searchWords={[input]}
-                    autoEscape={true}
-                    textToHighlight={item[info].toString()}
-                  />
-                </div>
-              ))}
-            </div>
-          ))
-        ) : (
-          <div className="flex">No User Found</div>
-        )}
+    <>
+      <div className="App">
+        <Search
+          onChange={handleChange}
+          value={input}
+          handleKeyPress={handleKeyPress}
+        />
+        <Dropdown
+          key={input}
+          listRef={listRef.current}
+          list={data}
+          searchText={input}
+          handleMouseOver={handleMouseOver}
+          handleKeyDown={handleItemKeyDown}
+        />
       </div>
-    </div>
+    </>
   );
 }
