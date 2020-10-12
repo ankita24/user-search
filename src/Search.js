@@ -2,7 +2,6 @@ import React from "react";
 
 export function Search({ onChange, value, handleKeyPress, searchRef }) {
   function moveCursorToEnd() {
-    // move cursor to the end on focus
     if (searchRef.current) {
       const self = searchRef.current;
       self.selectionStart = self.selectionEnd = self.value.length;
@@ -11,6 +10,7 @@ export function Search({ onChange, value, handleKeyPress, searchRef }) {
   return (
     <div className="searchContainer">
       <input
+        placeholder="Search user by ID, address,name... "
         ref={searchRef}
         autoComplete="off"
         id="search"
