@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { headers } from "./constants";
 import debounce from "./debounceFn";
 import { Dropdown } from "./Dropdown";
@@ -6,15 +6,15 @@ import { userDetails } from "./mockData";
 import { Search } from "./Search";
 import "./styles.css";
 
-export default function App() {
+export default function App(props) {
   const [data, setData] = useState([]);
   const [input, setInput] = useState("");
   const listRef = useRef([]);
+  const searchRef = useRef();
 
   const handleChange = useCallback((e) => {
     setInput(e.target.value);
     debounceSearch(e.target.value);
-    listRef.current = [];
   }, []);
 
   const debounceSearch = debounce((input) => {
@@ -41,7 +41,7 @@ export default function App() {
       });
       setData(finalData);
     }
-  }, 1000);
+  }, 500);
 
   const handleKeyPress = (e) => {
     if (e.key === "ArrowDown") {
@@ -57,31 +57,33 @@ export default function App() {
     }
   }
 
-  const handleItemKeyDown = (key, id) => {
+  const handleItemKeyDown = (e, id) => {
     if (listRef.current) {
-      if (key === "ArrowDown") {
+      if (e.key === "ArrowDown") {
         if (listRef.current[id + 1]) {
           listRef.current[id + 1].focus();
         }
-      } else if (key === "ArrowUp") {
+      } else if (e.key === "ArrowUp") {
         if (listRef.current[id - 1]) {
           listRef.current[id - 1].focus();
         }
+      } else {
+        searchRef.current && searchRef.current.focus();
+        handleChange(e);
       }
     }
   };
 
-  console.log(listRef.current)
   return (
     <>
       <div className="App">
         <Search
+          searchRef={searchRef}
           onChange={handleChange}
           value={input}
           handleKeyPress={handleKeyPress}
         />
         <Dropdown
-          key={input}
           listRef={listRef.current}
           list={data}
           searchText={input}

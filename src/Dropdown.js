@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import Highlighter from "react-highlight-words";
-import "./styles.css";
 
 const Item = React.forwardRef(
   ({ item, index, searchText, handleMouseOver, handleKeyDown }, ref) => {
@@ -11,12 +10,12 @@ const Item = React.forwardRef(
 
     function onKeyDown(e) {
       e.preventDefault()
-      handleKeyDown(e.key, index);
+      handleKeyDown(e, index);
     }
 
     useEffect(() => {
       if (itemRef.current) {
-        ref.push(itemRef.current);
+        ref[index] = itemRef.current;
       }
     }, []);
 
