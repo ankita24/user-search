@@ -6,7 +6,7 @@ import { userDetails } from "./mockData";
 import { Search } from "./Search";
 import "./styles.css";
 
-export default function App(props) {
+export default function App() {
   const [data, setData] = useState([]);
   const [input, setInput] = useState("");
   const listRef = useRef([]);
@@ -62,15 +62,16 @@ export default function App(props) {
       if (e.key === "ArrowDown") {
         if (listRef.current[id + 1]) {
           listRef.current[id + 1].focus();
+        } else {
+          listRef.current[0].focus();
         }
       } else if (e.key === "ArrowUp") {
         if (listRef.current[id - 1]) {
           listRef.current[id - 1].focus();
+        } else {
+          searchRef.current && searchRef.current.focus();
         }
-      } else {
-        searchRef.current && searchRef.current.focus();
-        handleChange(e);
-      }
+      };
     }
   };
 
